@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.classguard.mapper.UserMapper">
+
+    <!-- TODO: 按《数据库设计说明书（第8组）》V0.2 §6.3 补充 SQL
+         （selectByUsername / selectById / insert / updatePassword）。
+         约定：统一使用 #{} 预编译占位符，动态条件用 <if> 拼接，禁止 ${} 字符串拼接。 -->
+
+</mapper>
