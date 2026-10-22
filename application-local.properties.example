@@ -1,11 +1,16 @@
 # 本地联调配置（模板）
 #
-# 用法：把本文件复制为同目录下的 application-local.properties，填入你自己的实际值。
+# 用法：把本文件复制为**项目根目录**下的 application-local.properties，填入你自己的实际值。
 #   Windows: copy application-local.properties.example application-local.properties
 #   macOS/Linux: cp application-local.properties.example application-local.properties
 #
 # application-local.properties 已被 .gitignore 忽略，不会进入版本库；
 # 本模板中的值均为占位符，请勿把真实口令写回本文件。
+#
+# 之所以放在工作目录而非 src/main/resources：classpath 资源会被打进 jar，
+# 口令文件放进去就随产物一起分发了。application.properties 用
+# `spring.config.import=optional:file:./application-local.properties` 从工作目录加载，
+# 所以启动时当前目录必须是项目根目录（IDE 运行 / mvn spring-boot:run / 在根目录 java -jar 均满足）。
 #
 # 也可以用环境变量代替本文件（优先级更高）：
 #   CLASSROOM_DB_PASSWORD / CLASSROOM_MQTT_PASSWORD / CLASSROOM_JWT_SECRET

@@ -38,4 +38,4 @@ build/
 logs/
 
 ### 本地敏感配置（含数据库/MQTT 口令与 JWT 密钥，只提交 .example 模板）###
-src/main/resources/application-local.properties
+/application-local.properties

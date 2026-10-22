@@ -35,7 +35,7 @@ sql/upgrade_v0.5_alarm_dedup.sql   告警幂等键升级脚本（幂等可重复
    `classroom_app`（仅 SELECT/INSERT/UPDATE，不给 DDL/DELETE）。
 2. **配置本地口令**：
    ```bash
-   cd src/main/resources
+   # 在项目根目录执行
    cp application-local.properties.example application-local.properties
    # 填入 DB 口令、EMQX 口令、JWT 密钥（openssl rand -hex 32）
    ```
