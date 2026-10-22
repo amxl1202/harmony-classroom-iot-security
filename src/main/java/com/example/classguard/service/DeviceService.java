@@ -1,5 +1,6 @@
 package com.example.classguard.service;
 
+import com.example.classguard.dto.CmdContext;
 import com.example.classguard.dto.CommandResponse;
 import com.example.classguard.entity.Device;
 
@@ -20,4 +21,13 @@ public interface DeviceService {
 
     /** MQTT status 消息/LWT 更新设备在线状态：UPSERT（INSERT ... ON DUPLICATE KEY UPDATE），首次上线自动建档 */
     void updateOnlineStatus(String classroomId, String deviceId, boolean online);
+
+    /** MQTT cmd_resp 回执到达时唤醒 API-09 的同步等待（由 MqttMessageProcessor 回调，无等待者则仅记日志） */
+    void completeCommand(String cmdId, CommandResponse response);
+
+    /** 查询 cmd 下发上下文（供回执合并入库；无上下文返回 null） */
+    CmdContext getCmdContext(String cmdId);
+
+    /** 移除 cmd 下发上下文（回执入库完成后调用） */
+    void removeCmdContext(String cmdId);
 }

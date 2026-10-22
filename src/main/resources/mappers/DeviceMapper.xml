@@ -3,9 +3,39 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.classguard.mapper.DeviceMapper">
 
-    <!-- TODO: 按《数据库设计说明书（第8组）》V0.2 §6.3 补充 SQL
-         （selectAll / selectByPk / upsert）。
-         约定：upsert 使用 INSERT ... ON DUPLICATE KEY UPDATE
-         online = VALUES(online), last_online_at = VALUES(last_online_at)。 -->
+    <!-- ==================== 头部约定注释（DB V0.3 §6.3 全局约定） ====================
+         1) 统一使用 #{} 预编译占位符，动态条件用 <if> 拼接，禁止 ${} 字符串拼接；
+         2) 时间范围统一闭区间 [from, to]，且可只传其一；
+         3) 排序统一 ORDER BY created_at DESC, id DESC；分页统一 LIMIT #{offset}, #{limit}。
+         数据来源：《数据库设计说明书（第8组）》V0.3（已冻结）§4.4/§6.3，
+         接口出处：《REST 接口文档 v1.1》。 -->
+
+    <!-- API-08 设备列表与在线状态（REST v1.1 / DB V0.3 §6.3，管理员）：
+         online/lastOnlineAt 由 MQTT status/LWT 驱动 -->
+    <select id="selectAll" resultType="com.example.classguard.entity.Device">
+        SELECT classroom_id, device_id, device_name, online, last_online_at
+        FROM devices
+        ORDER BY classroom_id, device_id
+    </select>
+
+    <!-- API-09 指令下发·定位教室（REST v1.1 / DB V0.3 §6.3）：
+         按联合主键 (classroom_id, device_id) 查询，下发指令前定位教室编号 -->
+    <select id="selectByPk" resultType="com.example.classguard.entity.Device">
+        SELECT classroom_id, device_id, device_name, online, last_online_at
+        FROM devices
+        WHERE classroom_id = #{classroomId} AND device_id = #{deviceId}
+    </select>
+
+    <!-- MQTT status/LWT 在线状态更新（REST v1.1 / DB V0.3 §6.3(8)）：
+         INSERT ... ON DUPLICATE KEY UPDATE，设备首次上线自动建档；
+         注意：ON DUPLICATE KEY UPDATE 子句不得更新 device_name——status 消息不携带设备名称，
+         自动建档时 device_name 取空串兜底，UPSERT 必须保留预置设备的建档名称"1号教室安防主机" -->
+    <insert id="upsert">
+        INSERT INTO devices (classroom_id, device_id, device_name, online, last_online_at)
+        VALUES (#{classroomId}, #{deviceId}, #{deviceName}, #{online}, NOW())
+        ON DUPLICATE KEY UPDATE
+            online = VALUES(online),
+            last_online_at = VALUES(last_online_at)
+    </insert>
 
 </mapper>

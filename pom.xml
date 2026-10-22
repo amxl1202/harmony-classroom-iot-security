@@ -122,7 +122,6 @@
                 <version>${spring-boot.version}</version>
                 <configuration>
                     <mainClass>com.example.classguard.ClassGuardApplication</mainClass>
-                    <skip>true</skip>
                 </configuration>
                 <executions>
                     <execution>

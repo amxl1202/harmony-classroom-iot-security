@@ -31,3 +31,8 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### 本地工具产物（不该进版本库）###
+.kilo/
+*.log
+logs/

@@ -3,8 +3,49 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.classguard.mapper.DeviceRecordMapper">
 
-    <!-- TODO: 按《数据库设计说明书（第8组）》V0.2 §6.3 补充 SQL
-         （selectPage / selectCount / insertIgnore）。
-         约定：insertIgnore 使用 INSERT IGNORE INTO device_records ...，依赖 uk_cmd_id 唯一索引保证幂等。 -->
+    <!-- ==================== 头部约定注释（DB V0.3 §6.3 全局约定） ====================
+         1) 统一使用 #{} 预编译占位符，动态条件用 <if> 拼接，禁止 ${} 字符串拼接；
+         2) 时间范围统一闭区间 [from, to]，且可只传其一；
+         3) 排序统一 ORDER BY created_at DESC, id DESC；分页统一 LIMIT #{offset}, #{limit}。
+         数据来源：《数据库设计说明书（第8组）》V0.3（已冻结）§4.3/§6.3，
+         接口出处：《REST 接口文档 v1.1》。 -->
+
+    <!-- API-07 执行历史分页查询（REST v1.1 / DB V0.3 §6.3，管理员）：
+         from/to 闭区间 [from, to] 可只传其一 -->
+    <select id="selectPage" resultType="com.example.classguard.entity.DeviceRecord">
+        SELECT id, cmd_id, classroom_id, device_id, command, issued_by, result, reason, created_at
+        FROM device_records
+        <where>
+            <if test="from != null">
+                AND created_at &gt;= #{from}
+            </if>
+            <if test="to != null">
+                AND created_at &lt;= #{to}
+            </if>
+        </where>
+        ORDER BY created_at DESC, id DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <!-- API-07 执行历史分页总数（REST v1.1 / DB V0.3 §6.3，管理员）：条件与 selectPage 完全一致 -->
+    <select id="selectCount" resultType="long">
+        SELECT COUNT(*)
+        FROM device_records
+        <where>
+            <if test="from != null">
+                AND created_at &gt;= #{from}
+            </if>
+            <if test="to != null">
+                AND created_at &lt;= #{to}
+            </if>
+        </where>
+    </select>
+
+    <!-- MQTT cmd_resp 回执幂等写入（REST v1.1 / DB V0.3 §6.3(7)）：
+         INSERT IGNORE 依赖 uk_cmd_id 唯一索引，同一 cmd_id 仅首次写入生效 -->
+    <insert id="insertIgnore">
+        INSERT IGNORE INTO device_records (cmd_id, classroom_id, device_id, command, issued_by, result, reason)
+        VALUES (#{cmdId}, #{classroomId}, #{deviceId}, #{command}, #{issuedBy}, #{result}, #{reason})
+    </insert>
 
 </mapper>
