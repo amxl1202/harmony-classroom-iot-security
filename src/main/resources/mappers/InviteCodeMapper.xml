@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.classguard.mapper.InviteCodeMapper">
+
+    <!-- ==================== 头部约定注释（DB V0.4 §6.3 全局约定） ====================
+         1) 统一使用 #{} 预编译占位符，动态条件用 <if> 拼接，禁止 ${} 字符串拼接；
+         2) 排序统一 ORDER BY created_at DESC, id DESC；分页统一 LIMIT #{offset}, #{limit}。
+         数据来源：《数据库设计说明书（第8组）》V0.4（已冻结）§4.5/§6.3(9)~(12)，
+         接口出处：《REST 接口文档 v1.2》（文件名仍为 REST接口文档-v1.1.md，已冻结）API-01/10/11/12。 -->
+
+    <!-- API-01 注册校验·按邀请码查询（REST v1.2 / DB V0.4 §6.3(9)）：
+         SQL 只按 code 查；"存在 + 未作废 + 未过期"三条件由应用层判定：
+         无记录 或 status=1（已作废） 或 NOW()>=expires_at（已过期）→ 返回 1005 -->
+    <select id="selectByCode" resultType="com.example.classguard.entity.InviteCode">
+        SELECT id, code, status, expires_at, created_by, created_at
+        FROM invite_codes
+        WHERE code = #{code}
+        LIMIT 1
+    </select>
+
+    <!-- API-12 作废·前置校验（REST v1.2 / DB V0.4 §6.3(11)）：按主键查询，区分 3003 邀请码不存在与幂等 -->
+    <select id="selectById" resultType="com.example.classguard.entity.InviteCode">
+        SELECT id, code, status, expires_at, created_by, created_at
+        FROM invite_codes
+        WHERE id = #{id}
+        LIMIT 1
+    </select>
+
+    <!-- API-10 邀请码生成（REST v1.2 / DB V0.4 §6.3(10)）：
+         status 由调用方传 0（0 有效），expires_at / created_by 由调用方显式传入；
+         created_at 走数据库默认值 CURRENT_TIMESTAMP；useGeneratedKeys 回填自增主键 id -->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO invite_codes (code, status, expires_at, created_by)
+        VALUES (#{code}, #{status}, #{expiresAt}, #{createdBy})
+    </insert>
+
+    <!-- API-11 邀请码分页查询（REST v1.2 / DB V0.4 §6.3(12)）：全列查询，倒序分页 -->
+    <select id="selectPage" resultType="com.example.classguard.entity.InviteCode">
+        SELECT id, code, status, expires_at, created_by, created_at
+        FROM invite_codes
+        ORDER BY created_at DESC, id DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <!-- API-11 邀请码分页总数（REST v1.2 / DB V0.4 §6.3(12)） -->
+    <select id="selectCount" resultType="long">
+        SELECT COUNT(*)
+        FROM invite_codes
+    </select>
+
+    <!-- API-12 作废邀请码（REST v1.2 / DB V0.4 §6.3(11)）：
+         WHERE status=0 保证幂等，已作废邀请码重复调用不重复更新（返回 0 行由业务层幂等处理） -->
+    <update id="disable">
+        UPDATE invite_codes
+        SET status = 1
+        WHERE id = #{id} AND status = 0
+    </update>
+
+</mapper>

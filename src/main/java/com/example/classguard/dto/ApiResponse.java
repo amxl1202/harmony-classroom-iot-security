@@ -35,4 +35,23 @@ public class ApiResponse<T> {
         resp.message = message;
         return resp;
     }
+
+    /**
+     * 错误响应（携带 data）：供 3002 设备指令超时等需要在错误体中附带数据的场景，
+     * 对应《REST 接口文档 v1.1》§3 错误码表中 API-09 的超时响应示例
+     * {"code":3002,"message":"设备未响应，请稍后重试","data":{"cmdId":...,"result":null,...}}。
+     *
+     * @param code    错误码（如 3002）
+     * @param message 错误提示文案
+     * @param data    附加数据（3002 时为携带 cmdId 的 CommandResponse，可为 null）
+     * @param <T>     data 的类型
+     * @return 统一错误响应壳（code/message/data）
+     */
+    public static ApiResponse<Object> error(int code, String message, Object data) {
+        ApiResponse<Object> resp = new ApiResponse<>();
+        resp.code = code;
+        resp.message = message;
+        resp.data = data;
+        return resp;
+    }
 }

@@ -17,7 +17,7 @@ public interface UserMapper {
     /** 当前用户信息（API-04）：按主键查询 */
     User selectById(@Param("id") Long id);
 
-    /** 注册插入（API-01）：INSERT INTO users (username, password) VALUES — role 取默认值 user */
+    /** 注册（role=user，used_invite_code 记录所用邀请码，REST v1.2 API-01 / DB V0.4 §6.3(2)）与预置管理员（role=admin，used_invite_code 为 NULL）共用：显式插入 username/password/role/used_invite_code 四字段并回填自增 id */
     int insert(User user);
 
     /** 修改密码（API-03）：UPDATE password（入参为 BCrypt 哈希后的值） */

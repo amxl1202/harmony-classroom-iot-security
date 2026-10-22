@@ -23,6 +23,9 @@ public class User {
     /** 角色：admin / user */
     private String role;
 
+    /** 注册所用邀请码，逻辑关联 invite_codes.code；预置管理员为 NULL（DB V0.4 §4.1） */
+    private String usedInviteCode;
+
     /** 注册时间（服务端时间） */
     private LocalDateTime createdAt;
 }
