@@ -1,0 +1,21 @@
+# 本地联调配置（模板）
+#
+# 用法：把本文件复制为同目录下的 application-local.properties，填入你自己的实际值。
+#   Windows: copy application-local.properties.example application-local.properties
+#   macOS/Linux: cp application-local.properties.example application-local.properties
+#
+# application-local.properties 已被 .gitignore 忽略，不会进入版本库；
+# 本模板中的值均为占位符，请勿把真实口令写回本文件。
+#
+# 也可以用环境变量代替本文件（优先级更高）：
+#   CLASSROOM_DB_PASSWORD / CLASSROOM_MQTT_PASSWORD / CLASSROOM_JWT_SECRET
+
+# MySQL 账号 classroom_app 的口令（见 classroom_security_user.sql）
+spring.datasource.password=change-me
+
+# EMQX 中 backend1 账号的口令
+mqtt.password=change-me
+
+# JWT 签名密钥：64 位十六进制随机串（32 字节，满足 HS256 要求）
+# 生成示例：openssl rand -hex 32
+jwt.secret=change-me-please-generate-your-own-64-hex-chars
